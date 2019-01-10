@@ -1,10 +1,21 @@
 var vdad1 = 0;
 var vdad2 = 0;
 var sk = 1;
-console.log([
-    ...document.getElementsByTagName('video'),
-    ...document.getElementsByTagName('audio')
-]);
+
+
+function removeEls(d, array) {
+    var newArray = [];
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] != d) {
+            newArray.push(array[i]);
+        }
+    }
+    return newArray;
+}
+
+
+
+
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message, sender, sendResponse) {
@@ -28,15 +39,41 @@ function gotMessage(message, sender, sendResponse) {
 						
                 case "Scan!":
                         console.log(message);
-						
-                        let videoTags = [
+						var butn = [];
+						                        var videoTags = [
     ...document.getElementsByTagName('video'),
     ...document.getElementsByTagName('audio')
 ];
-                        console.log(videoTags);
-						
-                        var butn = [];
+var tmpVidTags = videoTags;
+						getStrms();
+						function getStrms(){
 
+   
+                        for (var k = 0, len = videoTags.length; k < len; k++) {
+                                if ((videoTags[k].src == "") && (videoTags[k].currentSrc == "")) {
+									 tmpVidTags=removeEls(videoTags[k], videoTags);
+								}
+                        }
+						
+						videoTags=tmpVidTags;
+						
+						                        for (var i = 0, len = videoTags.length; i < len; i++) {
+                                if (videoTags[i].src !== "") {
+                                        createbutn(i, videoTags[i], videoTags[i].src);
+                                } else if (videoTags[i].currentSrc !== "") {
+                                        createbutn(i, videoTags[i], videoTags[i].currentSrc);
+                        }
+												}
+
+
+   console.log(videoTags);
+						
+                        
+		}
+		
+		
+		
+		
                         function b_hide(b, v) {
                                 var timer;
                                 var hide = false;
@@ -69,13 +106,7 @@ function gotMessage(message, sender, sendResponse) {
                                 video.addEventListener('mouseenter', b_hide(butn[i], video), true);
                         }
 						
-                        for (var i = 0, len = videoTags.length; i < len; i++) {
-                                if (videoTags[i].src !== "") {
-                                        createbutn(i, videoTags[i], videoTags[i].src);
-                                } else if (videoTags[i].currentSrc !== "") {
-                                        createbutn(i, videoTags[i], videoTags[i].currentSrc);
-                                }
-                        }
+
 
                         function btclk(i, src) {
                                 return function() {

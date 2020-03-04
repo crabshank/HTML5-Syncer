@@ -14,8 +14,6 @@ function removeEls(d, array) {
 }
 
 
-
-
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message, sender, sendResponse) {
@@ -30,8 +28,9 @@ function gotMessage(message, sender, sendResponse) {
                         var sync_butns = document.getElementsByClassName("sync_butn");
 						
                         for (var i = sync_butns.length - 1; 0 <= i; i--){
-                                if (sync_butns[i] && sync_butns[i].parentElement)
-                                        sync_butns[i].parentElement.removeChild(sync_butns[i]);
+                                if (sync_butns[i] && sync_butns[i].parentElement){
+								sync_butns[i].parentElement.removeChild(sync_butns[i]);
+								}
 						}
 						
                 break;
@@ -40,6 +39,8 @@ function gotMessage(message, sender, sendResponse) {
                 case "Scan!":
                         console.log(message);
 						var butn = [];
+						var clse = [];
+
 						                        var videoTags = [
     ...document.getElementsByTagName('video'),
     ...document.getElementsByTagName('audio')
@@ -96,16 +97,39 @@ var tmpVidTags = videoTags;
                         }
 
                         function createbutn(i, video, src) {
+                       
                                 butn[i] = document.createElement("button");
                                 butn[i].style.zIndex = "999999";
                                 butn[i].style.position = "absolute";
+								butn[i].style.webkitTextFillColor="black";
+								butn[i].style.borderWidth="2px";
+								butn[i].style.borderStyle="outset";
+								butn[i].style.borderColor="buttonface";
                                 butn[i].innerHTML = "Sync: " + video.nodeName + ", " + src;
                                 butn[i].className = "sync_butn";
                                 video.insertAdjacentElement('beforebegin', butn[i]);
                                 butn[i].addEventListener("click", btclk(i, src));
+								clse[i] = document.createElement("button");
+								clse[i].style.zIndex = "999999";
+                                clse[i].style.position = "absolute";
+                                clse[i].style.left = butn[i].clientWidth+12+"px";
+                                clse[i].innerHTML = "×";
+								clse[i].className = "sync_butn";
+								clse[i].style.backgroundColor="#de0000";
+								clse[i].style.webkitTextFillColor="#ececec";
+								clse[i].style.borderWidth="2px";
+								clse[i].style.borderStyle="outset";
+								clse[i].style.borderColor="#de0000";
+								butn[i].insertAdjacentElement('afterend', clse[i]);
+                                clse[i].onclick = function btclse() {
+									clse[i].remove();
+									butn[i].remove();
+								};
                                 video.addEventListener('mouseenter', b_hide(butn[i], video), true);
+                                video.addEventListener('mouseenter', b_hide(clse[i], video), true);
                         }
 						
+
 
 
                         function btclk(i, src) {
@@ -117,7 +141,9 @@ var tmpVidTags = videoTags;
                                                 src: src
                                         }, function(response) {});
                                         butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src;
+                                        butn[i].style.borderColor="#00e900";
                                         butn[i].style.backgroundColor = "#00e900";
+										clse[i].style.left = butn[i].clientWidth+12+"px";
                                         if (vdad1 == 0) {
                                                 vdad1 = videoTags[i];
                                         } else {

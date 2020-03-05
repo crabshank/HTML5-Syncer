@@ -40,6 +40,7 @@ function gotMessage(message, sender, sendResponse) {
                         console.log(message);
 						var butn = [];
 						var clse = [];
+						var sdivs = [];
 
 						                        var videoTags = [
     ...document.getElementsByTagName('video'),
@@ -98,21 +99,21 @@ var tmpVidTags = videoTags;
 
                         function createbutn(i, video, src) {
                        
+                                sdivs[i] = document.createElement("div");
+                                sdivs[i].style.zIndex = "2147483647";
+                                sdivs[i].style.position = "absolute";
+								sdivs[i].className = "sync_butn";
+								sdivs[i].style.backgroundColor="";
                                 butn[i] = document.createElement("button");
-                                butn[i].style.zIndex = "999999";
-                                butn[i].style.position = "absolute";
 								butn[i].style.webkitTextFillColor="black";
 								butn[i].style.borderWidth="2px";
 								butn[i].style.borderStyle="outset";
 								butn[i].style.borderColor="buttonface";
                                 butn[i].innerHTML = "Sync: " + video.nodeName + ", " + src;
                                 butn[i].className = "sync_butn";
-                                video.insertAdjacentElement('beforebegin', butn[i]);
+                                video.insertAdjacentElement('beforebegin', sdivs[i]);
                                 butn[i].addEventListener("click", btclk(i, src));
 								clse[i] = document.createElement("button");
-								clse[i].style.zIndex = "999999";
-                                clse[i].style.position = "absolute";
-                                clse[i].style.left = butn[i].clientWidth+12+"px";
                                 clse[i].innerHTML = "×";
 								clse[i].className = "sync_butn";
 								clse[i].style.backgroundColor="#de0000";
@@ -120,13 +121,14 @@ var tmpVidTags = videoTags;
 								clse[i].style.borderWidth="2px";
 								clse[i].style.borderStyle="outset";
 								clse[i].style.borderColor="#de0000";
-								butn[i].insertAdjacentElement('afterend', clse[i]);
+								sdivs[i].appendChild(butn[i]);
+								sdivs[i].appendChild(clse[i]);
                                 clse[i].onclick = function btclse() {
 									clse[i].remove();
 									butn[i].remove();
+									sdivs[i].remove();
 								};
-                                video.addEventListener('mouseenter', b_hide(butn[i], video), true);
-                                video.addEventListener('mouseenter', b_hide(clse[i], video), true);
+                                video.addEventListener('mouseenter', b_hide(sdivs[i], video), true);
                         }
 						
 
@@ -143,7 +145,6 @@ var tmpVidTags = videoTags;
                                         butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src;
                                         butn[i].style.borderColor="#00e900";
                                         butn[i].style.backgroundColor = "#00e900";
-										clse[i].style.left = butn[i].clientWidth+12+"px";
                                         if (vdad1 == 0) {
                                                 vdad1 = videoTags[i];
                                         } else {

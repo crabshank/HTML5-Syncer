@@ -1,7 +1,9 @@
 var vdad1 = 0;
 var vdad2 = 0;
 var sk = 1;
-
+var butn = [];
+var clse = [];
+var sdivs = [];
 
 function removeEls(d, array) {
     var newArray = [];
@@ -38,9 +40,7 @@ function gotMessage(message, sender, sendResponse) {
 						
                 case "Scan!":
                         console.log(message);
-						var butn = [];
-						var clse = [];
-						var sdivs = [];
+
 
 						                        var videoTags = [
     ...document.getElementsByTagName('video'),
@@ -52,7 +52,7 @@ var tmpVidTags = videoTags;
 
    
                         for (var k = 0, len = videoTags.length; k < len; k++) {
-                                if ((videoTags[k].src == "") && (videoTags[k].currentSrc == "")) {
+                                if ((videoTags[k].src == "") && (videoTags[k].currentSrc == "") && (videoTags[k].readyState != 0)) {
 									 tmpVidTags=removeEls(videoTags[k], videoTags);
 								}
                         }
@@ -68,7 +68,11 @@ var tmpVidTags = videoTags;
 												}
 
 
-   console.log(videoTags);
+					 if (videoTags.length>1){ 
+					 console.log(videoTags);
+					 }else{
+					 console.log(videoTags[0]);
+					 }
 						
                         
 		}
@@ -77,33 +81,38 @@ var tmpVidTags = videoTags;
 		
 		
                         function b_hide(b, v) {
-                                var timer;
-                                var hide = false;
-                                b.style.display = '';
-                                v.addEventListener('mousemove', cursorhide, true);
-
                                 function cursorhide() {
                                         if (!hide) {
-                                                b.style.display = '';
+                                                b.style.display = 'initial';
+                                                b.style.visibility = 'initial';
                                                 clearTimeout(timer);
                                                 timer = setTimeout(function() {
+													if ((!(b.childNodes[0].matches(':hover')))&&(!(b.childNodes[1].matches(':hover')))){
                                                         b.style.display = 'none';
+                                                        b.style.visibility = 'hidden';
                                                         hide = true;
                                                         setTimeout(function() {
                                                                 hide = false;
                                                         }, 1);
+													}
                                                 }, 3000);
                                         }
                                 }
+							    v.removeEventListener('mousemove', cursorhide, true);
+                                var timer;
+                                var hide = false;
+                                b.style.display = 'initial';
+                                b.style.visibility = 'initial';
+                                v.addEventListener('mousemove', cursorhide, true);
                         }
 
                         function createbutn(i, video, src) {
                        
                                 sdivs[i] = document.createElement("div");
-                                sdivs[i].style.zIndex = "2147483647";
+                                sdivs[i].style.zIndex = Number.MAX_SAFE_INTEGER;
                                 sdivs[i].style.position = "absolute";
 								sdivs[i].className = "sync_butn";
-								sdivs[i].style.backgroundColor="";
+								sdivs[i].style.backgroundColor="transparent";
                                 butn[i] = document.createElement("button");
 								butn[i].style.webkitTextFillColor="black";
 								butn[i].style.borderWidth="2px";
@@ -132,8 +141,6 @@ var tmpVidTags = videoTags;
                         }
 						
 
-
-
                         function btclk(i, src) {
                                 return function() {
                                         chrome.extension.sendMessage({
@@ -142,7 +149,7 @@ var tmpVidTags = videoTags;
                                                 time: videoTags[i].currentTime,
                                                 src: src
                                         }, function(response) {});
-                                        butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src;
+                                        butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src+' - Delay:';
                                         butn[i].style.borderColor="#00e900";
                                         butn[i].style.backgroundColor = "#00e900";
                                         if (vdad1 == 0) {
@@ -228,8 +235,12 @@ var tmpVidTags = videoTags;
                                         });
                                 };
                         }
-						
-                        console.log(butn);
+
+					if (butn.length>1){ 
+					 console.log(butn);
+					 }else{
+					 console.log(butn[0]);
+					 }
 						
                         chrome.extension.sendMessage({
                                 message: "Buttons created!"
@@ -255,13 +266,21 @@ var tmpVidTags = videoTags;
                                 } else if (message.seeked == 1) {
                                         sk = 0;
                                         if (message.time < vdad.currentTime) {
-                                                vdad.currentTime = message.time + Math.abs(message.dly);
+                                                vdad.currentTime = message.time + Math.abs(message.dly);	
                                         } else {
                                                 vdad.currentTime = message.time - Math.abs(message.dly);
                                         }
                                 } else if (message.ratechange == 1) {
                                         vdad.playbackRate = message.rate;
                                 }
+														
+								if (typeof butn[message.id] !=='undefined'){
+									if (message.time < vdad.currentTime) {
+									butn[message.id].innerHTML=butn[message.id].innerHTML.split(' - Delay:')[0]+(' - Delay: ')+(message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s';
+									}else{
+									butn[message.id].innerHTML=butn[message.id].innerHTML.split(' - Delay:')[0]+(' - Delay: ')+(-1*message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s';
+									}
+								}
                         }
 						
                         if (message.src == vdad2.src) {
@@ -271,8 +290,8 @@ var tmpVidTags = videoTags;
                         } else if (vdad2 !== 0) {
                                 sEvts(vdad2);
                         }
+
                         break;
-						
 						
                 default:
                         console.log(message);

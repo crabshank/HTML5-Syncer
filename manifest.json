@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "HTML5 Syncer",
-  "version": "1.31",
+  "version": "1.32",
   "content_scripts": [
     {
 	      "all_frames": true,
@@ -15,7 +15,7 @@
     "scripts": ["background.js"],
     "persistent": true
   },
-  "permissions": ["tabs","activeTab", "storage"],
+  "permissions": ["tabs","activeTab"],
   "browser_action": {
     "default_icon": "ct.png",
     "default_popup": "index.html",

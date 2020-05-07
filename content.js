@@ -4,6 +4,7 @@ var sk = 1;
 var butn = [];
 var clse = [];
 var sdivs = [];
+var bdkCol="buttonface";
 
 function removeEls(d, array) {
     var newArray = [];
@@ -34,7 +35,7 @@ function gotMessage(message, sender, sendResponse) {
 								sync_butns[i].parentElement.removeChild(sync_butns[i]);
 								}
 						}
-						
+
                 break;
 						
 						
@@ -77,19 +78,24 @@ var tmpVidTags = videoTags;
                         
 		}
 		
-		
-		
-		
+
                         function b_hide(b, v) {
                                 function cursorhide() {
+									bdkCol=(b.childNodes[0].getAttribute("grn_synced")=="true")?"#00e900":"buttonface";
                                         if (!hide) {
-                                                b.style.display = 'initial';
-                                                b.style.visibility = 'initial';
+												b.style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
+												if (b.childNodes.length==2){
+													b.childNodes[0].style.cssText = "display: initial !important; visibility:initial !important;  webkit-text-fill-color: black !important; border-width: 2px !important; border-style: outset !important; background-color: "+bdkCol+" !important; border-color: "+bdkCol+" !important";
+													b.childNodes[1].style.cssText = "display: initial !important; visibility:initial !important; background-color: #de0000 !important; webkit-text-fill-color: #ececec !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
+												}
                                                 clearTimeout(timer);
                                                 timer = setTimeout(function() {
 													if ((!(b.childNodes[0].matches(':hover')))&&(!(b.childNodes[1].matches(':hover')))){
-                                                        b.style.display = 'none';
-                                                        b.style.visibility = 'hidden';
+                                                        b.style.cssText = "display: none !important; visibility: hidden !important;";
+														if (b.childNodes.length==2){
+															b.childNodes[0].style.cssText = "display: none !important; visibility:hidden !important;";
+															b.childNodes[1].style.cssText = "display: none !important; visibility:hidden !important;";
+														}
                                                         hide = true;
                                                         setTimeout(function() {
                                                                 hide = false;
@@ -101,35 +107,30 @@ var tmpVidTags = videoTags;
 							    v.removeEventListener('mousemove', cursorhide, true);
                                 var timer;
                                 var hide = false;
-                                b.style.display = 'initial';
-                                b.style.visibility = 'initial';
+                                b.style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
+								if (b.childNodes.length==2){
+								bdkCol=(b.childNodes[0].getAttribute("grn_synced")=="true")?"#00e900":"buttonface";
+                                b.childNodes[0].style.cssText = "display: initial !important; visibility:initial !important;  webkit-text-fill-color: black !important; border-width: 2px !important; border-style: outset !important; background-color: "+bdkCol+" !important; border-color: "+bdkCol+" !important";
+                                b.childNodes[1].style.cssText = "display: initial !important; visibility:initial !important; background-color: #de0000 !important; webkit-text-fill-color: #ececec !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
+								}
                                 v.addEventListener('mousemove', cursorhide, true);
                         }
 
                         function createbutn(i, video, src) {
                        
                                 sdivs[i] = document.createElement("div");
-                                sdivs[i].style.zIndex = Number.MAX_SAFE_INTEGER;
-                                sdivs[i].style.position = "absolute";
-								sdivs[i].className = "sync_butn";
-								sdivs[i].style.backgroundColor="transparent";
+                                sdivs[i].style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
                                 butn[i] = document.createElement("button");
-								butn[i].style.webkitTextFillColor="black";
-								butn[i].style.borderWidth="2px";
-								butn[i].style.borderStyle="outset";
-								butn[i].style.borderColor="buttonface";
+								butn[i].setAttribute("grn_synced", false);	
+								butn[i].style.cssText = "display: initial !important; visibility: initial !important;  webkit-text-fill-color: black !important; border-width: 2px !important; border-style: outset !important; background-color: buttonface !important; border-color: buttonface !important";
                                 butn[i].innerHTML = "Sync: " + video.nodeName + ", " + src;
                                 butn[i].className = "sync_butn";
                                 video.insertAdjacentElement('beforebegin', sdivs[i]);
                                 butn[i].addEventListener("click", btclk(i, src));
 								clse[i] = document.createElement("button");
+								clse[i].style.cssText = "display: initial !important; visibility: initial !important; background-color: #de0000 !important; webkit-text-fill-color: #ececec !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
                                 clse[i].innerHTML = "×";
 								clse[i].className = "sync_butn";
-								clse[i].style.backgroundColor="#de0000";
-								clse[i].style.webkitTextFillColor="#ececec";
-								clse[i].style.borderWidth="2px";
-								clse[i].style.borderStyle="outset";
-								clse[i].style.borderColor="#de0000";
 								sdivs[i].appendChild(butn[i]);
 								sdivs[i].appendChild(clse[i]);
                                 clse[i].onclick = function btclse() {
@@ -149,9 +150,9 @@ var tmpVidTags = videoTags;
                                                 time: videoTags[i].currentTime,
                                                 src: src
                                         }, function(response) {});
-                                        butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src+' - Delay:';
-                                        butn[i].style.borderColor="#00e900";
-                                        butn[i].style.backgroundColor = "#00e900";
+                                        butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src+' (Delay:';
+										butn[i].style.cssText="display: initial !important; visibility: initial !important; webkit-text-fill-color: black !important; border-width: 2px !important; border-style: outset !important; background-color: #00e900 !important; border-color: #00e900 !important;";
+										butn[i].setAttribute("grn_synced", true);	
                                         if (vdad1 == 0) {
                                                 vdad1 = videoTags[i];
                                         } else {
@@ -276,9 +277,9 @@ var tmpVidTags = videoTags;
 														
 								if (typeof butn[message.id] !=='undefined'){
 									if (message.time < vdad.currentTime) {
-									butn[message.id].innerHTML=butn[message.id].innerHTML.split(' - Delay:')[0]+(' - Delay: ')+(message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s';
+									butn[message.id].innerHTML=butn[message.id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 									}else{
-									butn[message.id].innerHTML=butn[message.id].innerHTML.split(' - Delay:')[0]+(' - Delay: ')+(-1*message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s';
+									butn[message.id].innerHTML=butn[message.id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(-1*message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 									}
 								}
                         }

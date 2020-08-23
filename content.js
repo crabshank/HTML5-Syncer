@@ -30,7 +30,7 @@ function gotMessage(message, sender, sendResponse) {
 						
                         var sync_butns = document.getElementsByClassName("sync_butn");
 						
-                        for (var i = sync_butns.length - 1; 0 <= i; i--){
+                        for (let i = sync_butns.length - 1; 0 <= i; i--){
                                 if (sync_butns[i] && sync_butns[i].parentElement){
 								sync_butns[i].parentElement.removeChild(sync_butns[i]);
 								}
@@ -52,7 +52,7 @@ var tmpVidTags = videoTags;
 						function getStrms(){
 
    
-                        for (var k = 0, len = videoTags.length; k < len; k++) {
+                        for (let k = 0, len = videoTags.length; k < len; k++) {
                                 if ((videoTags[k].src == "") && (videoTags[k].currentSrc == "") && (videoTags[k].readyState != 0)) {
 									 tmpVidTags=removeEls(videoTags[k], videoTags);
 								}
@@ -60,7 +60,7 @@ var tmpVidTags = videoTags;
 						
 						videoTags=tmpVidTags;
 						
-						                        for (var i = 0, len = videoTags.length; i < len; i++) {
+						                        for (let i = 0, len = videoTags.length; i < len; i++) {
                                 if (videoTags[i].src !== "") {
                                         createbutn(i, videoTags[i], videoTags[i].src);
                                 } else if (videoTags[i].currentSrc !== "") {
@@ -81,6 +81,7 @@ var tmpVidTags = videoTags;
 
                         function b_hide(b, v) {
                                 function cursorhide() {
+									if((typeof b.childNodes[0]!=="undefined")&&(typeof b.childNodes[1]!=="undefined")){
 									bdkCol=(b.childNodes[0].getAttribute("grn_synced")=="true")?"#00e900":"buttonface";
                                         if (!hide) {
 												b.style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
@@ -103,6 +104,7 @@ var tmpVidTags = videoTags;
 													}
                                                 }, 3000);
                                         }
+								}
                                 }
 							    v.removeEventListener('mousemove', cursorhide, true);
                                 var timer;
@@ -117,7 +119,17 @@ var tmpVidTags = videoTags;
                         }
 
                         function createbutn(i, video, src) {
-                       
+                       									for (let j=0; j<i; j++){
+										if (typeof butn[j]==="undefined"){
+											butn[j]="";
+										}
+										if (typeof sdivs[j]==="undefined"){
+											butn[j]="";
+										}
+										if (typeof clse[j]==="undefined"){
+											butn[j]="";
+										}
+									}
                                 sdivs[i] = document.createElement("div");
                                 sdivs[i].style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
                                 butn[i] = document.createElement("button");
@@ -144,9 +156,14 @@ var tmpVidTags = videoTags;
 
                         function btclk(i, src) {
                                 return function() {
+									
+									event.preventDefault();
+									event.stopPropagation();
+									
                                         chrome.extension.sendMessage({
                                                 message: "Sync this!",
                                                 id: i,
+                                                self_id: i,
                                                 time: videoTags[i].currentTime,
                                                 src: src
                                         }, function(response) {});
@@ -167,6 +184,7 @@ var tmpVidTags = videoTags;
                                                                 pause: 0,
                                                                 seeking: 1,
                                                                 id: i,
+                                                                self_id: i,
                                                                 seeked: 0,
                                                                 ratechange: 0,
                                                                 rate: videoTags[i].playbackRate,
@@ -183,6 +201,7 @@ var tmpVidTags = videoTags;
                                                                 pause: 0,
                                                                 seeking: 0,
                                                                 id: i,
+																self_id: i,
                                                                 seeked: 1,
                                                                 ratechange: 0,
                                                                 rate: videoTags[i].playbackRate,
@@ -200,6 +219,7 @@ var tmpVidTags = videoTags;
                                                         pause: 0,
                                                         seeking: 0,
                                                         id: i,
+                                                        self_id: i,
                                                         seeked: 0,
                                                         ratechange: 0,
                                                         rate: videoTags[i].playbackRate,
@@ -214,6 +234,7 @@ var tmpVidTags = videoTags;
                                                         pause: 1,
                                                         seeking: 0,
                                                         id: i,
+                                                        self_id: i,
                                                         seeked: 0,
                                                         ratechange: 0,
                                                         rate: videoTags[i].playbackRate,
@@ -228,6 +249,7 @@ var tmpVidTags = videoTags;
                                                         pause: 0,
                                                         seeking: 0,
                                                         id: i,
+                                                        self_id: i,
                                                         seeked: 0,
                                                         ratechange: 1,
                                                         rate: videoTags[i].playbackRate,
@@ -275,11 +297,11 @@ var tmpVidTags = videoTags;
                                         vdad.playbackRate = message.rate;
                                 }
 														
-								if (typeof butn[message.id] !=='undefined'){
+								if (typeof butn[message.self_id] !=='undefined'){
 									if (message.time < vdad.currentTime) {
-									butn[message.id].innerHTML=butn[message.id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
+									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 									}else{
-									butn[message.id].innerHTML=butn[message.id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(-1*message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
+									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(-1*message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 									}
 								}
                         }

@@ -20,13 +20,12 @@ function removeEls(d, array) {
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message, sender, sendResponse) {
-        switch (message.message) {
-			
+        console.log(message);
+		switch (message.message) {
                 case "Flush!":
                         chrome.extension.sendMessage({
                                 message: "Flush!"
                         }, function(response) {});
-                        console.log(message);
 						
                         var sync_butns = document.getElementsByClassName("sync_butn");
 						
@@ -40,9 +39,6 @@ function gotMessage(message, sender, sendResponse) {
 						
 						
                 case "Scan!":
-                        console.log(message);
-
-
 						                        var videoTags = [
     ...document.getElementsByTagName('video'),
     ...document.getElementsByTagName('audio')
@@ -71,7 +67,7 @@ var tmpVidTags = videoTags;
 
 					 if (videoTags.length>1){ 
 					 console.log(videoTags);
-					 }else{
+					 }else if (videoTags.length==1){
 					 console.log(videoTags[0]);
 					 }
 						
@@ -261,7 +257,7 @@ var tmpVidTags = videoTags;
 
 					if (butn.length>1){ 
 					 console.log(butn);
-					 }else{
+					 }else if(butn.length==1){
 					 console.log(butn[0]);
 					 }
 						
@@ -272,7 +268,6 @@ var tmpVidTags = videoTags;
 						
 						
                 case "sEvt":
-                        console.log(message);
 
                         function sEvts(vdad) {
                                 if (message.play == 1) {
@@ -317,7 +312,7 @@ var tmpVidTags = videoTags;
                         break;
 						
                 default:
-                        console.log(message);
+                        ;
                         break;
         }
 }

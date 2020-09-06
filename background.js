@@ -51,7 +51,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	break;
 
 	default:
-	console.log(request);
+	/*console.log(request)*/;
 	break;
 	 }
 	});

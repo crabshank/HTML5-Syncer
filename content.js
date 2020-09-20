@@ -155,7 +155,7 @@ var tmpVidTags = videoTags;
 									
 									event.preventDefault();
 									event.stopPropagation();
-									
+										videoTags[i].playbackRate=1;
                                         chrome.extension.sendMessage({
                                                 message: "Sync this!",
                                                 id: i,
@@ -301,11 +301,9 @@ var tmpVidTags = videoTags;
 								}
                         }
 						
-                        if (message.src == vdad2.src) {
+                        if (((message.src == vdad2.src)||(message.src !== vdad1.src))&&(vdad1!=0)) {
                                 sEvts(vdad1);
-                        } else if (message.src !== vdad1.src) {
-                                sEvts(vdad1);
-                        } else if (vdad2 !== 0) {
+					} else if (vdad2 !== 0) {
                                 sEvts(vdad2);
                         }
 

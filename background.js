@@ -25,6 +25,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 		}
 		sync=[];
 		msg=0;
+		dly=0;
 	break;
 		
 	case "Buttons created!":

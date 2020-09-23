@@ -5,6 +5,17 @@ var butn = [];
 var clse = [];
 var sdivs = [];
 var bdkCol="buttonface";
+var attached_vids=[];
+
+function get_src(vid){
+	if (vid.src !== "") {
+		return vid.src;
+	} else if (vid.currentSrc !== "") {
+		return vid.currentSrc;
+	}else{
+		return '';
+	}
+}
 
 function removeEls(d, array) {
     var newArray = [];
@@ -16,11 +27,136 @@ function removeEls(d, array) {
     return newArray;
 }
 
+function find_attached_info(vid){
+	for (let i = 0; i < attached_vids.length; i++) {
+        if (vid==attached_vids[i][0]) {
+                return [attached_vids[i][1],attached_vids[i][2]];
+        }
+    }
+}
+
+var seeking_hdl=function(e){
+	let i=find_attached_info(this);
+	if (sk == 1) {
+		chrome.extension.sendMessage({
+				message: "sEvt",
+				src: i[1],
+				play: 0,
+				pause: 0,
+				seeking: 1,
+				id: i[0],
+				self_id: i[0],
+				seeked: 0,
+				ratechange: 0,
+				durationchange: 0,
+				rate: this.playbackRate,
+				time: this.currentTime
+		}, function(response) {});
+	}
+}
+
+
+var seeked_hdl=function(e){
+	let i=find_attached_info(this);
+	if (sk == 1) {
+			chrome.extension.sendMessage({
+					message: "sEvt",
+					src: i[1],
+					play: 0,
+					pause: 0,
+					seeking: 0,
+					id: i[0],
+					self_id: i[0],
+					seeked: 1,
+					ratechange: 0,
+					durationchange: 0,
+					rate: this.playbackRate,
+					time: this.currentTime
+			}, function(response) {});
+	} else {
+			sk = 1;
+	}
+}
+
+var play_hdl=function(e){
+	let i=find_attached_info(this);
+			chrome.extension.sendMessage({
+					message: "sEvt",
+					src: i[1],
+					play: 1,
+					pause: 0,
+					seeking: 0,
+					id: i[0],
+					self_id: i[0],
+					seeked: 0,
+					ratechange: 0,
+					durationchange: 0,
+					rate: this.playbackRate,
+					time: this.currentTime
+			}, function(response) {});
+}
+
+
+var pause_hdl=function(e){
+	let i=find_attached_info(this);
+			chrome.extension.sendMessage({
+					message: "sEvt",
+					src: i[1],
+					play: 0,
+					pause: 1,
+					seeking: 0,
+					id: i[0],
+					self_id: i[0],
+					seeked: 0,
+					ratechange: 0,
+					durationchange: 0,
+					rate: this.playbackRate,
+					time: this.currentTime
+			}, function(response) {});
+}
+
+var ratechange_hdl=function(e){
+	let i=find_attached_info(this);
+			chrome.extension.sendMessage({
+					message: "sEvt",
+					src: i[1],
+					play: 0,
+					pause: 0,
+					seeking: 0,
+					id: i[0],
+					self_id: i[0],
+					seeked: 0,
+					ratechange: 1,
+					durationchange: 0,
+					rate: this.playbackRate,
+					time: this.currentTime
+			}, function(response) {});
+}
+
+var durchange_hdl=function(e){
+	/*let i=find_attached_info(this);
+			chrome.extension.sendMessage({
+					message: "sEvt",
+					src: i[1],
+					play: 0,
+					pause: 0,
+					seeking: 0,
+					id: i[0],
+					self_id: i[0],
+					seeked: 0,
+					ratechange: 0,
+					durationchange: 1,
+					rate: this.playbackRate,
+					time: this.currentTime
+			}, function(response) {});*/
+			//alert('Syncer: Duration changed!');
+			console.log('Syncer: Duration changed!');
+}
 
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message, sender, sendResponse) {
-        console.log(message);
+        //console.log(message);
 		switch (message.message) {
                 case "Flush!":
                         chrome.extension.sendMessage({
@@ -34,6 +170,23 @@ function gotMessage(message, sender, sendResponse) {
 								sync_butns[i].parentElement.removeChild(sync_butns[i]);
 								}
 						}
+
+                        for (let k = attached_vids.length - 1; 0 <= k; k--){
+							attached_vids[k][0].removeEventListener("seeking", seeking_hdl);
+							attached_vids[k][0].removeEventListener("seeked", seeked_hdl);
+							attached_vids[k][0].removeEventListener("play", play_hdl);
+							attached_vids[k][0].removeEventListener("pause", pause_hdl);
+							attached_vids[k][0].removeEventListener("ratechange", ratechange_hdl);
+							attached_vids[k][0].removeEventListener("durationchange", durchange_hdl);
+						}
+						
+						attached_vids = [];
+						vdad1 = 0;
+						vdad2 = 0;
+						sk = 1;
+						butn = [];
+						clse = [];
+						sdivs = [];
 
                 break;
 						
@@ -56,25 +209,22 @@ var tmpVidTags = videoTags;
 						
 						videoTags=tmpVidTags;
 						
-						                        for (let i = 0, len = videoTags.length; i < len; i++) {
-                                if (videoTags[i].src !== "") {
-                                        createbutn(i, videoTags[i], videoTags[i].src);
-                                } else if (videoTags[i].currentSrc !== "") {
-                                        createbutn(i, videoTags[i], videoTags[i].currentSrc);
-                        }
-												}
+						for (let i = 0, len = videoTags.length; i < len; i++) {
+								let source=get_src(videoTags[i]);
+                                if (source !== '') {
+                                        createbutn(i, videoTags[i], source);
+                                }
+						}
 
-
-					 if (videoTags.length>1){ 
-					 console.log(videoTags);
-					 }else if (videoTags.length==1){
-					 console.log(videoTags[0]);
-					 }
-						
+						 if (videoTags.length>1){ 
+						 console.log(videoTags);
+						 }else if (videoTags.length==1){
+						 console.log(videoTags[0]);
+						 }
+							
                         
-		}
+						}
 		
-
                         function b_hide(b, v) {
                                 function cursorhide() {
 									if((typeof b.childNodes[0]!=="undefined")&&(typeof b.childNodes[1]!=="undefined")){
@@ -115,15 +265,15 @@ var tmpVidTags = videoTags;
                         }
 
                         function createbutn(i, video, src) {
-                       									for (let j=0; j<i; j++){
+                       				for (let j=0; j<i; j++){
 										if (typeof butn[j]==="undefined"){
 											butn[j]="";
 										}
 										if (typeof sdivs[j]==="undefined"){
-											butn[j]="";
+											sdivs[j]="";
 										}
 										if (typeof clse[j]==="undefined"){
-											butn[j]="";
+											clse[j]="";
 										}
 									}
                                 sdivs[i] = document.createElement("div");
@@ -171,87 +321,13 @@ var tmpVidTags = videoTags;
                                         } else {
                                                 vdad2 = videoTags[i];
                                         }
-                                        videoTags[i].addEventListener("seeking", function() {
-                                                if (sk == 1) {
-                                                        chrome.extension.sendMessage({
-                                                                message: "sEvt",
-                                                                src: src,
-                                                                play: 0,
-                                                                pause: 0,
-                                                                seeking: 1,
-                                                                id: i,
-                                                                self_id: i,
-                                                                seeked: 0,
-                                                                ratechange: 0,
-                                                                rate: videoTags[i].playbackRate,
-                                                                time: videoTags[i].currentTime
-                                                        }, function(response) {});
-                                                }
-                                        });
-                                        videoTags[i].addEventListener("seeked", function() {
-                                                if (sk == 1) {
-                                                        chrome.extension.sendMessage({
-                                                                message: "sEvt",
-                                                                src: src,
-                                                                play: 0,
-                                                                pause: 0,
-                                                                seeking: 0,
-                                                                id: i,
-																self_id: i,
-                                                                seeked: 1,
-                                                                ratechange: 0,
-                                                                rate: videoTags[i].playbackRate,
-                                                                time: videoTags[i].currentTime
-                                                        }, function(response) {});
-                                                } else {
-                                                        sk = 1;
-                                                }
-                                        });
-                                        videoTags[i].addEventListener("play", function() {
-                                                chrome.extension.sendMessage({
-                                                        message: "sEvt",
-                                                        src: src,
-                                                        play: 1,
-                                                        pause: 0,
-                                                        seeking: 0,
-                                                        id: i,
-                                                        self_id: i,
-                                                        seeked: 0,
-                                                        ratechange: 0,
-                                                        rate: videoTags[i].playbackRate,
-                                                        time: videoTags[i].currentTime
-                                                }, function(response) {});
-                                        });
-                                        videoTags[i].addEventListener("pause", function() {
-                                                chrome.extension.sendMessage({
-                                                        message: "sEvt",
-                                                        src: src,
-                                                        play: 0,
-                                                        pause: 1,
-                                                        seeking: 0,
-                                                        id: i,
-                                                        self_id: i,
-                                                        seeked: 0,
-                                                        ratechange: 0,
-                                                        rate: videoTags[i].playbackRate,
-                                                        time: videoTags[i].currentTime
-                                                }, function(response) {});
-                                        });
-                                        videoTags[i].addEventListener("ratechange", function() {
-                                                chrome.extension.sendMessage({
-                                                        message: "sEvt",
-                                                        src: src,
-                                                        play: 0,
-                                                        pause: 0,
-                                                        seeking: 0,
-                                                        id: i,
-                                                        self_id: i,
-                                                        seeked: 0,
-                                                        ratechange: 1,
-                                                        rate: videoTags[i].playbackRate,
-                                                        time: videoTags[i].currentTime
-                                                }, function(response) {});
-                                        });
+										attached_vids.push([videoTags[i],i,src]);
+                                        videoTags[i].addEventListener("seeking", seeking_hdl);
+                                        videoTags[i].addEventListener("seeked", seeked_hdl);
+                                        videoTags[i].addEventListener("play", play_hdl);
+                                        videoTags[i].addEventListener("pause", pause_hdl);
+                                        videoTags[i].addEventListener("ratechange", ratechange_hdl);
+                                        videoTags[i].addEventListener("durationchange", durchange_hdl);
                                 };
                         }
 
@@ -270,6 +346,7 @@ var tmpVidTags = videoTags;
                 case "sEvt":
 
                         function sEvts(vdad) {
+							    console.log(message);
                                 if (message.play == 1) {
                                         vdad.play();
                                 } else if (message.pause == 1) {
@@ -292,8 +369,8 @@ var tmpVidTags = videoTags;
                                         vdad.playbackRate = message.rate;
                                 }
 														
-								if (typeof butn[message.self_id] !=='undefined'){
-									if (message.time < vdad.currentTime) {
+								if ((butn[message.self_id] !='')&&(typeof butn[message.self_id] !=='undefined')){
+									if ((message.time <= vdad.currentTime)||(message.dly==0)) {
 									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 									}else{
 									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(-1*message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
@@ -301,12 +378,19 @@ var tmpVidTags = videoTags;
 								}
                         }
 						
-                        if (((message.src == vdad2.src)||(message.src !== vdad1.src))&&(vdad1!=0)) {
-                                sEvts(vdad1);
-					} else if (vdad2 !== 0) {
-                                sEvts(vdad2);
-                        }
-
+						g_src_vdad1=get_src(vdad1);
+						g_src_vdad2=get_src(vdad2);
+						
+							if(typeof g_src_vdad2=="undefined"){
+								if(!((message.src==g_src_vdad1)||(message.src==g_src_vdad2))){
+									sEvts(vdad1);
+								}
+							}else if(message.src==g_src_vdad2){
+								sEvts(vdad1);
+							}else{
+								sEvts(vdad2);
+							}
+							
                         break;
 						
                 default:

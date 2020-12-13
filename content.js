@@ -5,12 +5,15 @@ var butn = [];
 var clse = [];
 var sdivs = [];
 var bdkCol="buttonface";
+var videoTags=[];
 var attached_vids=[];
+var trk=0;
+var trk2=0;
 
 function get_src(vid){
-	if (vid.src !== "") {
+	if (vid.src != "") {
 		return vid.src;
-	} else if (vid.currentSrc !== "") {
+	} else if (vid.currentSrc != "") {
 		return vid.currentSrc;
 	}else{
 		return '';
@@ -192,36 +195,54 @@ function gotMessage(message, sender, sendResponse) {
 						
 						
                 case "Scan!":
-						                        var videoTags = [
-    ...document.getElementsByTagName('video'),
-    ...document.getElementsByTagName('audio')
-];
-var tmpVidTags = videoTags;
+
 						getStrms();
-						function getStrms(){
-
-   
-                        for (let k = 0, len = videoTags.length; k < len; k++) {
-                                if ((videoTags[k].src == "") && (videoTags[k].currentSrc == "") && (videoTags[k].readyState != 0)) {
-									 tmpVidTags=removeEls(videoTags[k], videoTags);
-								}
-                        }
-						
-						videoTags=tmpVidTags;
-						
-						for (let i = 0, len = videoTags.length; i < len; i++) {
-								let source=get_src(videoTags[i]);
-                                if (source !== '') {
-                                        createbutn(i, videoTags[i], source);
-                                }
-						}
-
-						 if (videoTags.length>1){ 
-						 console.log(videoTags);
-						 }else if (videoTags.length==1){
-						 console.log(videoTags[0]);
-						 }
+function getStrms(){
 							
+	var tmpVidTags = [
+	...document.getElementsByTagName('video'),
+	...document.getElementsByTagName('audio')
+	];
+
+if (videoTags.length==0){
+	videoTags=tmpVidTags;
+	trk=0;
+		for (let k = 0; k<videoTags.length; k++) {
+			if (!((get_src(videoTags[k])!='') && (videoTags[k].readyState != 0))) {
+				videoTags=removeEls(videoTags[k], videoTags);
+			}
+		}
+}else{
+	
+	trk2=(videoTags.length==0)?0:videoTags.length;
+
+		for (let k = 0; k<tmpVidTags.length; k++) {
+			if (!videoTags.includes(tmpVidTags[k])) {
+				videoTags.push(tmpVidTags[k]);
+				trk=trk2;
+			}
+		}
+		
+		for (let k = trk; k<videoTags.length; k++) {
+				if (!((get_src(videoTags[k])!='') && (videoTags[k].readyState != 0))) {
+				videoTags=removeEls(videoTags[k], videoTags);
+				trk--;
+				}
+		}
+
+}
+
+for (let i = trk; i<videoTags.length; i++) {
+createbutn(i, videoTags[i], get_src(videoTags[i]));
+}
+
+if (videoTags.length>1){ 
+console.log(videoTags);
+}else if (videoTags.length==1){
+console.log(videoTags[0]);
+}
+
+
                         
 						}
 		
@@ -346,6 +367,7 @@ var tmpVidTags = videoTags;
                 case "sEvt":
 
                         function sEvts(vdad) {
+							if (vdad!=0){
 							    console.log(message);
                                 if (message.play == 1) {
                                         vdad.play();
@@ -376,11 +398,13 @@ var tmpVidTags = videoTags;
 									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(-1*message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 									}
 								}
+						}
                         }
 						
 						g_src_vdad1=get_src(vdad1);
 						g_src_vdad2=get_src(vdad2);
 						
+
 							if(typeof g_src_vdad2=="undefined"){
 								if(!((message.src==g_src_vdad1)||(message.src==g_src_vdad2))){
 									sEvts(vdad1);

@@ -5,6 +5,7 @@ var butn = [];
 var clse = [];
 var sdivs = [];
 var bdkCol="buttonface";
+var bdkCol2="black";
 var videoTags=[];
 var attached_vids=[];
 var trk=0;
@@ -18,6 +19,33 @@ function get_src(vid){
 	}else{
 		return '';
 	}
+}
+
+function eligVid(vid){
+if((get_src(vid)!='') && (vid.readyState != 0)){
+	return true;
+}else{
+	return false;
+}
+}
+
+function checkInclude(arr,el){
+	let inside=false;
+	for (let i = 0; i < arr.length; i++) {
+		if(arr[i]===el){
+			inside=true;
+			break;
+		}
+	}
+	return inside;
+}
+
+function simpleCopyArray(array){
+		var newArray = [];
+	    for (let i = 0; i < array.length; i++) {
+            newArray.push(array[i]);
+		}
+		return newArray;
 }
 
 function removeEls(d, array) {
@@ -205,10 +233,11 @@ function getStrms(){
 	];
 
 if (videoTags.length==0){
-	videoTags=tmpVidTags;
+	videoTags=simpleCopyArray(tmpVidTags);
+	
 	trk=0;
 		for (let k = 0; k<videoTags.length; k++) {
-			if (!((get_src(videoTags[k])!='') && (videoTags[k].readyState != 0))) {
+			if (!eligVid(videoTags[k])) {
 				videoTags=removeEls(videoTags[k], videoTags);
 			}
 		}
@@ -217,14 +246,14 @@ if (videoTags.length==0){
 	trk2=(videoTags.length==0)?0:videoTags.length;
 
 		for (let k = 0; k<tmpVidTags.length; k++) {
-			if (!videoTags.includes(tmpVidTags[k])) {
+			if (!checkInclude(videoTags,tmpVidTags[k])) {
 				videoTags.push(tmpVidTags[k]);
 				trk=trk2;
 			}
 		}
 		
 		for (let k = trk; k<videoTags.length; k++) {
-				if (!((get_src(videoTags[k])!='') && (videoTags[k].readyState != 0))) {
+				if (!eligVid(videoTags[k])) {
 				videoTags=removeEls(videoTags[k], videoTags);
 				trk--;
 				}
@@ -249,20 +278,21 @@ console.log(videoTags[0]);
                         function b_hide(b, v) {
                                 function cursorhide() {
 									if((typeof b.childNodes[0]!=="undefined")&&(typeof b.childNodes[1]!=="undefined")){
-									bdkCol=(b.childNodes[0].getAttribute("grn_synced")=="true")?"#00e900":"buttonface";
+									bdkCol=(b.childNodes[0].getAttribute("grn_synced")=="true")?"#004200":"buttonface";
+									bdkCol2=(b.childNodes[0].getAttribute("grn_synced")=="true")?"white":"black";
                                         if (!hide) {
 												b.style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
 												if (b.childNodes.length==2){
-													b.childNodes[0].style.cssText = "display: initial !important; visibility:initial !important;  webkit-text-fill-color: black !important; border-width: 2px !important; border-style: outset !important; background-color: "+bdkCol+" !important; border-color: "+bdkCol+" !important";
-													b.childNodes[1].style.cssText = "display: initial !important; visibility:initial !important; background-color: #de0000 !important; webkit-text-fill-color: #ececec !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
+													b.childNodes[0].style.cssText = "display: initial !important; visibility:initial !important;  color: "+bdkCol2+" !important; border-width: 2px !important; border-style: outset !important; background-color: "+bdkCol+" !important; border-color: "+bdkCol+" !important";
+													b.childNodes[1].style.cssText = "display: initial !important; visibility:initial !important; background-color: #de0000 !important; color: white !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
 												}
                                                 clearTimeout(timer);
                                                 timer = setTimeout(function() {
 													if ((!(b.childNodes[0].matches(':hover')))&&(!(b.childNodes[1].matches(':hover')))){
-                                                        b.style.cssText = "display: none !important; visibility: hidden !important;";
+                                                        b.style.opacity = '0';
 														if (b.childNodes.length==2){
-															b.childNodes[0].style.cssText = "display: none !important; visibility:hidden !important;";
-															b.childNodes[1].style.cssText = "display: none !important; visibility:hidden !important;";
+															b.childNodes[0].style.opacity = '0';
+															b.childNodes[1].style.opacity = '0';
 														}
                                                         hide = true;
                                                         setTimeout(function() {
@@ -274,15 +304,20 @@ console.log(videoTags[0]);
 								}
                                 }
 							    v.removeEventListener('mousemove', cursorhide, true);
+								b.removeEventListener('mouseover', cursorhide, true);
+                                b.removeEventListener('mouseout', cursorhide, true);
                                 var timer;
                                 var hide = false;
                                 b.style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
 								if (b.childNodes.length==2){
-								bdkCol=(b.childNodes[0].getAttribute("grn_synced")=="true")?"#00e900":"buttonface";
-                                b.childNodes[0].style.cssText = "display: initial !important; visibility:initial !important;  webkit-text-fill-color: black !important; border-width: 2px !important; border-style: outset !important; background-color: "+bdkCol+" !important; border-color: "+bdkCol+" !important";
-                                b.childNodes[1].style.cssText = "display: initial !important; visibility:initial !important; background-color: #de0000 !important; webkit-text-fill-color: #ececec !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
+								bdkCol=(b.childNodes[0].getAttribute("grn_synced")=="true")?"#004200":"buttonface";
+								bdkCol2=(b.childNodes[0].getAttribute("grn_synced")=="true")?"white":"black";
+                                b.childNodes[0].style.cssText = "display: initial !important; visibility:initial !important;  color: "+bdkCol2+" !important; border-width: 2px !important; border-style: outset !important; background-color: "+bdkCol+" !important; border-color: "+bdkCol+" !important";
+                                b.childNodes[1].style.cssText = "display: initial !important; visibility:initial !important; background-color: #de0000 !important; color: white !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
 								}
                                 v.addEventListener('mousemove', cursorhide, true);
+                                b.addEventListener('mouseover', cursorhide, true);
+                                b.addEventListener('mouseout', cursorhide, true);
                         }
 
                         function createbutn(i, video, src) {
@@ -301,13 +336,13 @@ console.log(videoTags[0]);
                                 sdivs[i].style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
                                 butn[i] = document.createElement("button");
 								butn[i].setAttribute("grn_synced", false);	
-								butn[i].style.cssText = "display: initial !important; visibility: initial !important;  webkit-text-fill-color: black !important; border-width: 2px !important; border-style: outset !important; background-color: buttonface !important; border-color: buttonface !important";
+								butn[i].style.cssText = "display: initial !important; visibility: initial !important;  color: "+bdkCol2+" !important; border-width: 2px !important; border-style: outset !important; background-color: buttonface !important; border-color: buttonface !important";
                                 butn[i].innerHTML = "Sync: " + video.nodeName + ", " + src;
                                 butn[i].className = "sync_butn";
                                 video.insertAdjacentElement('beforebegin', sdivs[i]);
                                 butn[i].addEventListener("click", btclk(i, src));
 								clse[i] = document.createElement("button");
-								clse[i].style.cssText = "display: initial !important; visibility: initial !important; background-color: #de0000 !important; webkit-text-fill-color: #ececec !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
+								clse[i].style.cssText = "display: initial !important; visibility: initial !important; background-color: #de0000 !important; color: white !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
                                 clse[i].innerHTML = "×";
 								clse[i].className = "sync_butn";
 								sdivs[i].appendChild(butn[i]);
@@ -326,6 +361,7 @@ console.log(videoTags[0]);
 									
 									event.preventDefault();
 									event.stopPropagation();
+									if(butn[i].getAttribute("grn_synced")!="true"){
 										videoTags[i].playbackRate=1;
                                         chrome.extension.sendMessage({
                                                 message: "Sync this!",
@@ -335,7 +371,7 @@ console.log(videoTags[0]);
                                                 src: src
                                         }, function(response) {});
                                         butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src+' (Delay:';
-										butn[i].style.cssText="display: initial !important; visibility: initial !important; webkit-text-fill-color: black !important; border-width: 2px !important; border-style: outset !important; background-color: #00e900 !important; border-color: #00e900 !important;";
+										butn[i].style.cssText="display: initial !important; visibility: initial !important; color: white !important; border-width: 2px !important; border-style: outset !important; background-color: #004200 !important; border-color: #004200 !important;";
 										butn[i].setAttribute("grn_synced", true);	
                                         if (vdad1 == 0) {
                                                 vdad1 = videoTags[i];
@@ -349,6 +385,7 @@ console.log(videoTags[0]);
                                         videoTags[i].addEventListener("pause", pause_hdl);
                                         videoTags[i].addEventListener("ratechange", ratechange_hdl);
                                         videoTags[i].addEventListener("durationchange", durchange_hdl);
+								}
                                 };
                         }
 

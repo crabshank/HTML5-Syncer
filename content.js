@@ -31,7 +31,7 @@ if((get_src(vid)!='') && (vid.readyState != 0)){
 
 function checkInclude(arr,el){
 	let inside=false;
-	for (let i = 0; i < arr.length; i++) {
+	for (let i = arr.length-1; i >= 0; i--) {
 		if(arr[i]===el){
 			inside=true;
 			break;
@@ -243,7 +243,7 @@ if (videoTags.length==0){
 		}
 }else{
 	
-	trk2=(videoTags.length==0)?0:videoTags.length;
+	trk2=videoTags.length;
 
 		for (let k = 0; k<tmpVidTags.length; k++) {
 			if (!checkInclude(videoTags,tmpVidTags[k])) {

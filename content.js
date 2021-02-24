@@ -11,6 +11,14 @@ var attached_vids=[];
 var trk=0;
 var trk2=0;
 
+function elRemover(el){
+	if(typeof el!=='undefined' && !!el){
+	if(typeof el.parentNode!=='undefined' && !!el.parentNode){
+		el.parentNode.removeChild(el);
+	}
+	}
+}
+
 function get_src(vid){
 	if (vid.src != "") {
 		return vid.src;
@@ -281,7 +289,7 @@ console.log(videoTags[0]);
 									bdkCol=(b.childNodes[0].getAttribute("grn_synced")=="true")?"#004200":"buttonface";
 									bdkCol2=(b.childNodes[0].getAttribute("grn_synced")=="true")?"white":"black";
                                         if (!hide) {
-												b.style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
+												b.style.cssText = "left: 0em !important; display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
 												if (b.childNodes.length==2){
 													b.childNodes[0].style.cssText = "display: initial !important; visibility:initial !important;  color: "+bdkCol2+" !important; border-width: 2px !important; border-style: outset !important; background-color: "+bdkCol+" !important; border-color: "+bdkCol+" !important";
 													b.childNodes[1].style.cssText = "display: initial !important; visibility:initial !important; background-color: #de0000 !important; color: white !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
@@ -308,7 +316,7 @@ console.log(videoTags[0]);
                                 b.removeEventListener('mouseout', cursorhide, true);
                                 var timer;
                                 var hide = false;
-                                b.style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
+                                b.style.cssText = "left: 0em !important; display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
 								if (b.childNodes.length==2){
 								bdkCol=(b.childNodes[0].getAttribute("grn_synced")=="true")?"#004200":"buttonface";
 								bdkCol2=(b.childNodes[0].getAttribute("grn_synced")=="true")?"white":"black";
@@ -333,7 +341,7 @@ console.log(videoTags[0]);
 										}
 									}
                                 sdivs[i] = document.createElement("div");
-                                sdivs[i].style.cssText = "display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
+                                sdivs[i].style.cssText = "left: 0em !important; display: initial !important; visibility: initial !important; z-index: "+Number.MAX_SAFE_INTEGER+" !important; position: absolute !important; background-color: transparent !important;";
                                 butn[i] = document.createElement("button");
 								butn[i].setAttribute("grn_synced", false);	
 								butn[i].style.cssText = "display: initial !important; visibility: initial !important;  color: "+bdkCol2+" !important; border-width: 2px !important; border-style: outset !important; background-color: buttonface !important; border-color: buttonface !important";
@@ -348,9 +356,9 @@ console.log(videoTags[0]);
 								sdivs[i].appendChild(butn[i]);
 								sdivs[i].appendChild(clse[i]);
                                 clse[i].onclick = function btclse() {
-									clse[i].remove();
-									butn[i].remove();
-									sdivs[i].remove();
+									elRemover(clse[i]);
+									elRemover(butn[i]);
+									elRemover(sdivs[i]);
 								};
                                 video.addEventListener('mouseenter', b_hide(sdivs[i], video), true);
                         }

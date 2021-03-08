@@ -1,3 +1,4 @@
+try {
 var sc=0;
 var sync=[];
 var dly=0;
@@ -84,3 +85,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	break;
 	 }
 	});
+}
+catch (e) {	
+  console.error(e);
+}

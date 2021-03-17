@@ -7,10 +7,6 @@ function send(message) {
     chrome.tabs.query(params, gotTabs);
 
     function gotTabs(tabs) {
-      console.log("got tabs");
-      console.log(tabs);
-      // send a message to the content script
-     // let message = userinput.value();
       let msg = {
         message: message
       };

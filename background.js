@@ -14,7 +14,7 @@ function check_snd(src,sender){
 	}
 }
  
-chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		console.log(request);
 	switch (request.message){
 	case "Flush!":

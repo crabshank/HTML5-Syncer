@@ -77,7 +77,7 @@ function find_attached_info(vid){
 var seeking_hdl=function(e){
 	let i=find_attached_info(this);
 	if (sk == 1) {
-		chrome.extension.sendMessage({
+		chrome.runtime.sendMessage({
 				message: "sEvt",
 				src: i[1],
 				play: 0,
@@ -98,7 +98,7 @@ var seeking_hdl=function(e){
 var seeked_hdl=function(e){
 	let i=find_attached_info(this);
 	if (sk == 1) {
-			chrome.extension.sendMessage({
+			chrome.runtime.sendMessage({
 					message: "sEvt",
 					src: i[1],
 					play: 0,
@@ -119,7 +119,7 @@ var seeked_hdl=function(e){
 
 var play_hdl=function(e){
 	let i=find_attached_info(this);
-			chrome.extension.sendMessage({
+			chrome.runtime.sendMessage({
 					message: "sEvt",
 					src: i[1],
 					play: 1,
@@ -138,7 +138,7 @@ var play_hdl=function(e){
 
 var pause_hdl=function(e){
 	let i=find_attached_info(this);
-			chrome.extension.sendMessage({
+			chrome.runtime.sendMessage({
 					message: "sEvt",
 					src: i[1],
 					play: 0,
@@ -156,7 +156,7 @@ var pause_hdl=function(e){
 
 var ratechange_hdl=function(e){
 	let i=find_attached_info(this);
-			chrome.extension.sendMessage({
+			chrome.runtime.sendMessage({
 					message: "sEvt",
 					src: i[1],
 					play: 0,
@@ -174,7 +174,7 @@ var ratechange_hdl=function(e){
 
 var durchange_hdl=function(e){
 	/*let i=find_attached_info(this);
-			chrome.extension.sendMessage({
+			chrome.runtime.sendMessage({
 					message: "sEvt",
 					src: i[1],
 					play: 0,
@@ -198,7 +198,7 @@ function gotMessage(message, sender, sendResponse) {
         //console.log(message);
 		switch (message.message) {
                 case "Flush!":
-                        chrome.extension.sendMessage({
+                        chrome.runtime.sendMessage({
                                 message: "Flush!"
                         }, function(response) {});
 						
@@ -371,7 +371,7 @@ console.log(videoTags[0]);
 									event.stopPropagation();
 									if(butn[i].getAttribute("grn_synced")!="true"){
 										videoTags[i].playbackRate=1;
-                                        chrome.extension.sendMessage({
+                                        chrome.runtime.sendMessage({
                                                 message: "Sync this!",
                                                 id: i,
                                                 self_id: i,
@@ -403,7 +403,7 @@ console.log(videoTags[0]);
 					 console.log(butn[0]);
 					 }
 						
-                        chrome.extension.sendMessage({
+                        chrome.runtime.sendMessage({
                                 message: "Buttons created!"
                         }, function(response) {});
                         break;

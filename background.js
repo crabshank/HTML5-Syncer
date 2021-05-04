@@ -84,6 +84,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		check_snd(request.src,sender);
 	break;
 	 }
+	 return true;
 	});
 }
 catch (e) {	

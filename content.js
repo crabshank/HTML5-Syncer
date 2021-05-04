@@ -466,4 +466,5 @@ console.log(videoTags[0]);
                         ;
                         break;
         }
+		return true;
 }

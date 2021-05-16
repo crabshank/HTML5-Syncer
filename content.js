@@ -401,7 +401,8 @@ console.log(videoTags[0]);
                                                 time: videoTags[i].currentTime,
                                                 src: src
                                         }, function(response) {});
-                                        butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src+' (Delay:';
+                                        butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src+' (Difference:';
+										butn[i].setAttribute('src', src);
 										butn[i].style.cssText="display: initial !important; visibility: initial !important; color: white !important; border-width: 2px !important; border-style: outset !important; background-color: #004200 !important; border-color: #004200 !important;";
 										butn[i].setAttribute("grn_synced", true);	
                                         if (vdad1 == 0) {
@@ -496,13 +497,6 @@ console.log(videoTags[0]);
                                         vdad.playbackRate = message.rate;
                                 }
 														
-								if ((butn[message.self_id] !='')&&(typeof butn[message.self_id] !=='undefined')){
-									if ((message.time <= vdad.currentTime)||(dly==0)) {
-									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
-									}else{
-									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(-1*dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
-									}
-								}
 						}
                         }
 						
@@ -519,6 +513,12 @@ console.log(videoTags[0]);
 							}else{
 								sEvts(vdad2);
 							}
+							
+								if ((butn[message.self_id] !='') && (typeof butn[message.self_id] !=='undefined') && (message.src==butn[message.self_id].getAttribute('src'))){
+									if ((message.time <= videoTags[message.self_id].currentTime)||(dly==0)) {
+									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Difference:')[0]+(' (Difference: ')+(Math.abs(dly)).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
+									}
+								}
 							
                         break;
 						

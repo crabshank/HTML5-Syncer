@@ -11,6 +11,10 @@ var attached_vids=[];
 var trk=0;
 var trk2=0;
 
+var sync=[];
+var dly=0;
+var msg=0;
+
 function elRemover(el){
 	if(typeof el!=='undefined' && !!el){
 	if(typeof el.parentNode!=='undefined' && !!el.parentNode){
@@ -89,7 +93,8 @@ var seeking_hdl=function(e){
 				ratechange: 0,
 				durationchange: 0,
 				rate: this.playbackRate,
-				time: this.currentTime
+				time: this.currentTime,
+				syncTabs:[sync[0].sender.tab.id,sync[1].sender.tab.id]
 		}, function(response) {});
 	}
 }
@@ -110,7 +115,8 @@ var seeked_hdl=function(e){
 					ratechange: 0,
 					durationchange: 0,
 					rate: this.playbackRate,
-					time: this.currentTime
+					time: this.currentTime,
+					syncTabs:[sync[0].sender.tab.id,sync[1].sender.tab.id]
 			}, function(response) {});
 	} else {
 			sk = 1;
@@ -131,7 +137,8 @@ var play_hdl=function(e){
 					ratechange: 0,
 					durationchange: 0,
 					rate: this.playbackRate,
-					time: this.currentTime
+					time: this.currentTime,
+					syncTabs:[sync[0].sender.tab.id,sync[1].sender.tab.id]
 			}, function(response) {});
 }
 
@@ -150,7 +157,8 @@ var pause_hdl=function(e){
 					ratechange: 0,
 					durationchange: 0,
 					rate: this.playbackRate,
-					time: this.currentTime
+					time: this.currentTime,
+					syncTabs:[sync[0].sender.tab.id,sync[1].sender.tab.id]
 			}, function(response) {});
 }
 
@@ -168,7 +176,8 @@ var ratechange_hdl=function(e){
 					ratechange: 1,
 					durationchange: 0,
 					rate: this.playbackRate,
-					time: this.currentTime
+					time: this.currentTime,
+					syncTabs:[sync[0].sender.tab.id,sync[1].sender.tab.id]
 			}, function(response) {});
 }
 
@@ -186,7 +195,8 @@ var durchange_hdl=function(e){
 					ratechange: 0,
 					durationchange: 1,
 					rate: this.playbackRate,
-					time: this.currentTime
+					time: this.currentTime,
+					syncTabs:[sync[0].sender.tab.id,sync[1].sender.tab.id]
 			}, function(response) {});*/
 			//alert('Syncer: Duration changed!');
 			console.log('Syncer: Duration changed!');
@@ -197,10 +207,20 @@ chrome.runtime.onMessage.addListener(gotMessage);
 function gotMessage(message, sender, sendResponse) {
         //console.log(message);
 		switch (message.message) {
+			case "repl":
+				for (let i =0; i<sync.length; i++){
+					if(sync[i].sender.tab.id==message.og){
+						sync[i].sender.tab.id=nw;
+					}
+				}
+			break;
+			
                 case "Flush!":
-                        chrome.runtime.sendMessage({
-                                message: "Flush!"
-                        }, function(response) {});
+        try{
+						chrome.runtime.sendMessage({
+                                message: "Flush!",
+								syncTabs:[sync[0].sender.tab.id,sync[1].sender.tab.id]
+						}, function(response) {});
 						
                         var sync_butns = document.getElementsByClassName("sync_butn");
 						
@@ -226,7 +246,10 @@ function gotMessage(message, sender, sendResponse) {
 						butn = [];
 						clse = [];
 						sdivs = [];
-
+						sync=[];
+						msg=0;
+						dly=0;
+						}catch(e){;}
                 break;
 						
 						
@@ -409,6 +432,43 @@ console.log(videoTags[0]);
                         break;
 						
 						
+                case "scIncr":
+				
+				if(sync.length<2){
+				sync.push({request:message.request,sender:message.sender});
+				
+				if(sync.length==2){
+				dly=sync[1].request.time-sync[0].request.time;
+				for (let i=0; i<sync.length; i++){	
+				let other=(i==0)?1:0;
+				let s_id=(sync[i].request.id!=sync[other].request.id)?sync[other].request.id:sync[i].request.id;
+				let sy_msg={
+					"message": "sEvt",
+					"src": sync[i].request.src,
+					"play": 0,
+					"pause": 0,
+					"seeking": 0,
+					"id": sync[i].request.id,
+					"self_id": s_id,
+					"seeked": 0,
+					"ratechange": 0,
+					"durationchange": 0,
+					"rate": 1,
+					"time":sync[i].request.time,
+					"dly": dly,
+					syncTabs:[sync[0].sender.tab.id,sync[1].sender.tab.id]
+				};
+
+				}
+				}
+				
+				}else{
+			console.log("2 streams already synced!");
+			console.log(sync);
+				}
+				
+				break;
+
                 case "sEvt":
 
                         function sEvts(vdad) {
@@ -421,26 +481,26 @@ console.log(videoTags[0]);
                                 } else if (message.seeking == 1) {
                                         sk = 0;
                                         if (message.time < vdad.currentTime) {
-                                                vdad.currentTime = message.time + Math.abs(message.dly);
+                                                vdad.currentTime = message.time + Math.abs(dly);
                                         } else {
-                                                vdad.currentTime = message.time - Math.abs(message.dly);
+                                                vdad.currentTime = message.time - Math.abs(dly);
                                         }
                                 } else if (message.seeked == 1) {
                                         sk = 0;
                                         if (message.time < vdad.currentTime) {
-                                                vdad.currentTime = message.time + Math.abs(message.dly);	
+                                                vdad.currentTime = message.time + Math.abs(dly);	
                                         } else {
-                                                vdad.currentTime = message.time - Math.abs(message.dly);
+                                                vdad.currentTime = message.time - Math.abs(dly);
                                         }
                                 } else if (message.ratechange == 1) {
                                         vdad.playbackRate = message.rate;
                                 }
 														
 								if ((butn[message.self_id] !='')&&(typeof butn[message.self_id] !=='undefined')){
-									if ((message.time <= vdad.currentTime)||(message.dly==0)) {
-									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
+									if ((message.time <= vdad.currentTime)||(dly==0)) {
+									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 									}else{
-									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(-1*message.dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
+									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(-1*dly).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 									}
 								}
 						}

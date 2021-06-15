@@ -67,7 +67,7 @@ function removeEls(d, array) {
 function find_attached_info(vid) {
     for (let i = 0; i < attached_vids.length; i++) {
         if (vid == attached_vids[i][0]) {
-            return [attached_vids[i][1], attached_vids[i][2]];
+            return [attached_vids[i][1], attached_vids[i][2],attached_vids[i][0]];
         }
     }
 }
@@ -131,6 +131,10 @@ var play_hdl = function(e) {
         syncTabs: [sync[0].sender.tab.id, sync[1].sender.tab.id]
     }, function(response) {});
 }
+var play_it = function(e) {
+    let i = find_attached_info(this);
+	i[2].play();
+}
 var pause_hdl = function(e) {
     let i = find_attached_info(this);
     chrome.runtime.sendMessage({
@@ -149,6 +153,7 @@ var pause_hdl = function(e) {
         syncTabs: [sync[0].sender.tab.id, sync[1].sender.tab.id]
     }, function(response) {});
 }
+
 var ratechange_hdl = function(e) {
     let i = find_attached_info(this);
     chrome.runtime.sendMessage({
@@ -216,7 +221,11 @@ function gotMessage(message, sender, sendResponse) {
                     attached_vids[k][0].removeEventListener("seeking", seeking_hdl);
                     attached_vids[k][0].removeEventListener("seeked", seeked_hdl);
                     attached_vids[k][0].removeEventListener("play", play_hdl);
+                    attached_vids[k][0].removeEventListener("playing", play_it);
+                    attached_vids[k][0].removeEventListener("canplay", play_it);
+                    attached_vids[k][0].removeEventListener("canplaythrough", play_it);
                     attached_vids[k][0].removeEventListener("pause", pause_hdl);
+                    attached_vids[k][0].removeEventListener("waiting", pause_hdl);
                     attached_vids[k][0].removeEventListener("ratechange", ratechange_hdl);
                     attached_vids[k][0].removeEventListener("durationchange", durchange_hdl);
                 }
@@ -285,6 +294,7 @@ function gotMessage(message, sender, sendResponse) {
                             }
                             clearTimeout(timer);
                             timer = setTimeout(function() {
+								if ((typeof b.childNodes[0] !== "undefined") && (typeof b.childNodes[1] !== "undefined")) {
                                 if ((!(b.childNodes[0].matches(':hover'))) && (!(b.childNodes[1].matches(':hover')))) {
                                     b.style.opacity = '0';
                                     if (b.childNodes.length == 2) {
@@ -296,6 +306,7 @@ function gotMessage(message, sender, sendResponse) {
                                         hide = false;
                                     }, 1);
                                 }
+								}
                             }, 3000);
                         }
                     }
@@ -391,7 +402,11 @@ function gotMessage(message, sender, sendResponse) {
                         videoTags[i].addEventListener("seeking", seeking_hdl);
                         videoTags[i].addEventListener("seeked", seeked_hdl);
                         videoTags[i].addEventListener("play", play_hdl);
+                        videoTags[i].addEventListener("playing", play_it);
+                        videoTags[i].addEventListener("canplay", play_it);
+                        videoTags[i].addEventListener("canplaythrough", play_it);
                         videoTags[i].addEventListener("pause", pause_hdl);
+                        videoTags[i].addEventListener("waiting", pause_hdl);
                         videoTags[i].addEventListener("ratechange", ratechange_hdl);
                         videoTags[i].addEventListener("durationchange", durchange_hdl);
                     }

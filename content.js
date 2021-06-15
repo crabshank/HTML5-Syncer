@@ -117,7 +117,7 @@ var play_hdl = function(e) {
     let i = find_attached_info(this);
 	if (attached_vids[i[3]][3].waiting){
 		attached_vids[i[3]][3].waiting=false;
-		}else{
+		}
     chrome.runtime.sendMessage({
         message: "sEvt",
         src: i[1],
@@ -133,7 +133,6 @@ var play_hdl = function(e) {
         time: this.currentTime,
         syncTabs: [sync[0].sender.tab.id, sync[1].sender.tab.id]
     }, function(response) {});
-		}
 }
 var play_it = function(e) {
     let i = find_attached_info(this);
@@ -153,7 +152,7 @@ var pause_hdl = function(e) {
         seeking: 0,
         id: i[0],
         self_id: i[0],
-        seeked: 0,
+        seeked: 1,
         ratechange: 0,
         durationchange: 0,
         rate: this.playbackRate,
@@ -175,7 +174,7 @@ var waiting_hdl = function(e) {
         seeking: 0,
         id: i[0],
         self_id: i[0],
-        seeked: 0,
+        seeked: 1,
         ratechange: 0,
         durationchange: 0,
         rate: this.playbackRate,
@@ -487,8 +486,10 @@ function gotMessage(message, sender, sendResponse) {
             function sEvts(vdad) {
                 	if ((vdad!=0) && (JSON.stringify(last_msg) !== JSON.stringify(message))){
                     console.log(message);
-                    if (message.play == 1) {
+                    if (message.play == 1 && vdad.readyState>=3) {
                         vdad.play();
+                    }else if (message.play == 1 && vdad.readyState<3) {
+                        vdad.pause();
                     } else if (message.pause == 1) {
                         vdad.pause();
                     } else if (message.seeking == 1) {
@@ -498,16 +499,18 @@ function gotMessage(message, sender, sendResponse) {
                         } else {
                             vdad.currentTime = message.time - Math.abs(dly);
                         }
-                    } else if (message.seeked == 1) {
+                    }else if (message.ratechange == 1) {
+                        vdad.playbackRate = message.rate;
+                    }
+					
+					if (message.seeked == 1) {
                         sk = 0;
                         if (message.time < vdad.currentTime) {
                             vdad.currentTime = message.time + Math.abs(dly);
                         } else {
                             vdad.currentTime = message.time - Math.abs(dly);
                         }
-                    } else if (message.ratechange == 1) {
-                        vdad.playbackRate = message.rate;
-                    }
+                    } 
                 }
             }
             g_src_vdad1 = get_src(vdad1);

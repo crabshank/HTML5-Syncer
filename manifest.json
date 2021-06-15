@@ -3,7 +3,7 @@
 
   "manifest_version": 3,
   "name": "HTML5 Syncer",
-  "version": "1.62",
+  "version": "1.63",
   "content_scripts": [
     {
 	      "all_frames": true,

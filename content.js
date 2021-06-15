@@ -67,7 +67,7 @@ function removeEls(d, array) {
 function find_attached_info(vid) {
     for (let i = 0; i < attached_vids.length; i++) {
         if (vid == attached_vids[i][0]) {
-            return [attached_vids[i][1], attached_vids[i][2],attached_vids[i][0]];
+            return [attached_vids[i][1], attached_vids[i][2],attached_vids[i][0],i];
         }
     }
 }
@@ -115,6 +115,9 @@ var seeked_hdl = function(e) {
 }
 var play_hdl = function(e) {
     let i = find_attached_info(this);
+	if (attached_vids[i[3]][3].waiting){
+		attached_vids[i[3]][3].waiting=false;
+		}else{
     chrome.runtime.sendMessage({
         message: "sEvt",
         src: i[1],
@@ -130,10 +133,13 @@ var play_hdl = function(e) {
         time: this.currentTime,
         syncTabs: [sync[0].sender.tab.id, sync[1].sender.tab.id]
     }, function(response) {});
+		}
 }
 var play_it = function(e) {
     let i = find_attached_info(this);
+	if(attached_vids[i[3]][3].waiting){
 	i[2].play();
+	}
 }
 var pause_hdl = function(e) {
     let i = find_attached_info(this);
@@ -152,6 +158,26 @@ var pause_hdl = function(e) {
         time: this.currentTime,
         syncTabs: [sync[0].sender.tab.id, sync[1].sender.tab.id]
     }, function(response) {});
+}
+
+var waiting_hdl = function(e) {
+    let i = find_attached_info(this);
+    chrome.runtime.sendMessage({
+        message: "sEvt",
+        src: i[1],
+        play: 0,
+        pause: 1,
+        seeking: 0,
+        id: i[0],
+        self_id: i[0],
+        seeked: 0,
+        ratechange: 0,
+        durationchange: 0,
+        rate: this.playbackRate,
+        time: this.currentTime,
+        syncTabs: [sync[0].sender.tab.id, sync[1].sender.tab.id]
+    }, function(response) {});
+	attached_vids[i[3]][3].waiting=true;
 }
 
 var ratechange_hdl = function(e) {
@@ -225,7 +251,7 @@ function gotMessage(message, sender, sendResponse) {
                     attached_vids[k][0].removeEventListener("canplay", play_it);
                     attached_vids[k][0].removeEventListener("canplaythrough", play_it);
                     attached_vids[k][0].removeEventListener("pause", pause_hdl);
-                    attached_vids[k][0].removeEventListener("waiting", pause_hdl);
+                    attached_vids[k][0].removeEventListener("waiting", waiting_hdl);
                     attached_vids[k][0].removeEventListener("ratechange", ratechange_hdl);
                     attached_vids[k][0].removeEventListener("durationchange", durchange_hdl);
                 }
@@ -398,7 +424,7 @@ function gotMessage(message, sender, sendResponse) {
                         } else {
                             vdad2 = videoTags[i];
                         }
-                        attached_vids.push([videoTags[i], i, src]);
+                        attached_vids.push([videoTags[i], i, src,{waiting: false}]);
                         videoTags[i].addEventListener("seeking", seeking_hdl);
                         videoTags[i].addEventListener("seeked", seeked_hdl);
                         videoTags[i].addEventListener("play", play_hdl);
@@ -406,7 +432,7 @@ function gotMessage(message, sender, sendResponse) {
                         videoTags[i].addEventListener("canplay", play_it);
                         videoTags[i].addEventListener("canplaythrough", play_it);
                         videoTags[i].addEventListener("pause", pause_hdl);
-                        videoTags[i].addEventListener("waiting", pause_hdl);
+                        videoTags[i].addEventListener("waiting", waiting_hdl);
                         videoTags[i].addEventListener("ratechange", ratechange_hdl);
                         videoTags[i].addEventListener("durationchange", durchange_hdl);
                     }

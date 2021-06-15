@@ -117,7 +117,7 @@ var play_hdl = function(e) {
     let i = find_attached_info(this);
 	if (attached_vids[i[3]][3].waiting){
 		attached_vids[i[3]][3].waiting=false;
-		}
+		}else{
     chrome.runtime.sendMessage({
         message: "sEvt",
         src: i[1],
@@ -133,6 +133,7 @@ var play_hdl = function(e) {
         time: this.currentTime,
         syncTabs: [sync[0].sender.tab.id, sync[1].sender.tab.id]
     }, function(response) {});
+		}
 }
 var play_it = function(e) {
     let i = find_attached_info(this);

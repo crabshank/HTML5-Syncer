@@ -141,8 +141,10 @@ var play_it = function(e) {
 	i[2].play();
 	}
 }
+
 var pause_hdl = function(e) {
     let i = find_attached_info(this);
+		if (!attached_vids[i[3]][3].waiting){
     chrome.runtime.sendMessage({
         message: "sEvt",
         src: i[1],
@@ -159,9 +161,12 @@ var pause_hdl = function(e) {
         syncTabs: [sync[0].sender.tab.id, sync[1].sender.tab.id]
     }, function(response) {});
 }
+}
 
 var waiting_hdl = function(e) {
     let i = find_attached_info(this);
+	attached_vids[i[3]][3].waiting=true;
+	i[2].pause();
     chrome.runtime.sendMessage({
         message: "sEvt",
         src: i[1],
@@ -177,7 +182,7 @@ var waiting_hdl = function(e) {
         time: this.currentTime,
         syncTabs: [sync[0].sender.tab.id, sync[1].sender.tab.id]
     }, function(response) {});
-	attached_vids[i[3]][3].waiting=true;
+
 }
 
 var ratechange_hdl = function(e) {

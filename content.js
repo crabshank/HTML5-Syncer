@@ -14,7 +14,77 @@ var sync = [];
 var dly = 0;
 var msg = 0;
 var last_msg;
+var btnClass='sync_butn';
 
+function getTagNameShadow(docm, tgn){
+var shrc=[docm];
+var shrc_l=1;
+
+let srCnt=0;
+
+while(srCnt<shrc_l){
+	allNodes=[shrc[srCnt],...shrc[srCnt].querySelectorAll('*')];
+	for(let i=0, len=allNodes.length; i<len; i++){
+		if(!!allNodes[i] && typeof allNodes[i] !=='undefined' && allNodes[i].tagName===tgn && i>0){
+			shrc.push(allNodes[i]);
+		}
+
+		if(!!allNodes[i].shadowRoot && typeof allNodes[i].shadowRoot !=='undefined'){
+			let c=allNodes[i].shadowRoot.children;
+			shrc.push(...c);
+		}
+	}
+	srCnt++;
+	shrc_l=shrc.length;
+}
+	shrc=shrc.slice(1);
+	let out=shrc.filter((c)=>{return c.tagName===tgn;});
+	
+	return out;
+}
+function absBoundingClientRect(el){
+	let st = [window?.scrollY,
+					window?.pageYOffset,
+					el?.ownerDocument?.documentElement?.scrollTop,
+					document?.documentElement?.scrollTop,
+					document?.body?.parentNode?.scrollTop,
+					document?.body?.scrollTop,
+					document?.head?.scrollTop];
+					
+		let sl = [window?.scrollX,
+						window?.pageXOffset,
+						el?.ownerDocument?.documentElement?.scrollLeft,
+						document?.documentElement?.scrollLeft,
+						document?.body?.parentNode?.scrollLeft,
+						document?.body?.scrollLeft,
+						document?.head?.scrollLeft];
+						
+				let scrollTop=0;
+				for(let k=0; k<st.length; k++){
+					if(!!st[k] && typeof  st[k] !=='undefined' && st[k]>0){
+						scrollTop=(st[k]>scrollTop)?st[k]:scrollTop;
+					}
+				}			
+
+				let scrollLeft=0;
+				for(let k=0; k<sl.length; k++){
+					if(!!sl[k] && typeof  sl[k] !=='undefined' && sl[k]>0){
+						scrollLeft=(sl[k]>scrollLeft)?sl[k]:scrollLeft;
+					}
+				}
+	
+	const rct=el.getBoundingClientRect();
+	let r={};
+
+	r.left=rct.left+scrollLeft;
+	r.right=rct.right+scrollLeft;
+	r.top=rct.top+scrollTop;
+	r.bottom=rct.bottom+scrollTop;
+	r.height=rct.height;
+	r.width=rct.width;
+	
+	return r;
+}
 function elRemover(el) {
     if (typeof el !== 'undefined' && !!el) {
         if (typeof el.parentNode !== 'undefined' && !!el.parentNode) {
@@ -140,7 +210,6 @@ var play_it = function(e) {
 	i[2].play();
 	}
 }
-
 var pause_hdl = function(e) {
     let i = find_attached_info(this);
 		if (!attached_vids[i[3]][3].waiting){
@@ -161,7 +230,6 @@ var pause_hdl = function(e) {
     }, function(response) {});
 }
 }
-
 var waiting_hdl = function(e) {
     let i = find_attached_info(this);
 	attached_vids[i[3]][3].waiting=true;
@@ -183,7 +251,6 @@ var waiting_hdl = function(e) {
     }, function(response) {});
 
 }
-
 var ratechange_hdl = function(e) {
     let i = find_attached_info(this);
     chrome.runtime.sendMessage({
@@ -222,6 +289,7 @@ var durchange_hdl = function(e) {
     //alert('Syncer: Duration changed!');
     console.log('Syncer: Duration changed!');
 }
+
 chrome.runtime.onMessage.addListener(gotMessage);
 function gotMessage(message, sender, sendResponse) {
     //console.log(message);
@@ -241,11 +309,9 @@ function gotMessage(message, sender, sendResponse) {
 			}, function(response) {});}catch(e){;}
 			
 			try{
-                var sync_butns = document.getElementsByClassName("sync_butn");
-                for (let i = sync_butns.length - 1; 0 <= i; i--) {
-                    if (sync_butns[i] && sync_butns[i].parentElement) {
-                        sync_butns[i].parentElement.removeChild(sync_butns[i]);
-                    }
+                var sync_butns = getTagNameShadow(document,'BUTTON').filter((b)=>{return b.className===btnClass;});
+                for (let i = sync_butns.length - 1; i>=0; i--) {
+					elRemover(sync_butns[i]);
                 }
                 for (let k = attached_vids.length - 1; 0 <= k; k--) {
                     attached_vids[k][0].removeEventListener("seeking", seeking_hdl);
@@ -276,8 +342,8 @@ function gotMessage(message, sender, sendResponse) {
             getStrms();
             function getStrms() {
                 var tmpVidTags = [
-                    ...document.getElementsByTagName('video'),
-                    ...document.getElementsByTagName('audio')
+                    ...getTagNameShadow(document,'VIDEO'),
+                    ...getTagNameShadow(document,'AUDIO')
                 ];
                 if (videoTags.length == 0) {
                     videoTags = simpleCopyArray(tmpVidTags);
@@ -374,15 +440,17 @@ function gotMessage(message, sender, sendResponse) {
                 butn[i] = document.createElement("button");
                 butn[i].setAttribute("grn_synced", false);
                 butn[i].style.cssText = "display: initial !important; visibility: initial !important;  color: " + bdkCol2 + " !important; border-width: 2px !important; border-style: outset !important; background-color: buttonface !important; border-color: buttonface !important";
-                butn[i].innerHTML = "Sync: " + video.nodeName + ", " + src;
+                let btxt= "Sync: " + video.nodeName + ", " + src;
+				butn[i].setAttribute('info', btxt);
+                butn[i].innerHTML = btxt;
 				butn[i].setAttribute('src', src);
-                butn[i].className = "sync_butn";
+                butn[i].className = btnClass;
                 video.insertAdjacentElement('beforebegin', sdivs[i]);
                 butn[i].addEventListener("click", btclk(i, src));
                 clse[i] = document.createElement("button");
                 clse[i].style.cssText = "display: initial !important; visibility: initial !important; background-color: #de0000 !important; color: white !important; border-width: 2px !important; border-style: outset !important; border-color: #de0000 !important";
                 clse[i].innerHTML = "×";
-                clse[i].className = "sync_butn";
+                clse[i].className = btnClass;
                 sdivs[i].appendChild(butn[i]);
                 sdivs[i].appendChild(clse[i]);
                 clse[i].onclick = function btclse() {
@@ -391,9 +459,9 @@ function gotMessage(message, sender, sendResponse) {
                     elRemover(sdivs[i]);
                 }
 				
-				let vrct=video.getBoundingClientRect();
-				let sdrct=sdivs[i].getBoundingClientRect();
-				let wdrct=window.document.documentElement.getBoundingClientRect();
+				let vrct=absBoundingClientRect(video);
+				let sdrct=absBoundingClientRect(sdivs[i]);
+				let wdrct=absBoundingClientRect(window.document.documentElement);
 				if(video.nodeName==='AUDIO'){
 					if(vrct.bottom+sdrct.height<=wdrct.bottom){		
 					sdivs[i].setAttribute('top_pos','top: '+vrct.bottom+'px');
@@ -408,7 +476,7 @@ function gotMessage(message, sender, sendResponse) {
                 video.addEventListener('mouseenter', b_hide(sdivs[i], video), true);
             }
             function btclk(i, src) {
-                return function() {
+                return function(event) {
                     event.preventDefault();
                     event.stopPropagation();
                     if (butn[i].getAttribute("grn_synced") != "true") {
@@ -420,7 +488,9 @@ function gotMessage(message, sender, sendResponse) {
                             time: videoTags[i].currentTime,
                             src: src
                         }, function(response) {});
-                        butn[i].innerHTML = "SYNCED!: " + videoTags[i].nodeName + ", " + src + ' (Delay:';
+						let btxt= "SYNCED!: " + videoTags[i].nodeName + ", " + src;
+						butn[i].setAttribute('info', btxt);
+                        butn[i].innerHTML = btxt + ' (Delay:';
                         butn[i].style.cssText = "display: initial !important; visibility: initial !important; color: white !important; border-width: 2px !important; border-style: outset !important; background-color: #004200 !important; border-color: #004200 !important;";
                         butn[i].setAttribute("grn_synced", true);
                         if (vdad1 == 0) {
@@ -464,10 +534,10 @@ function gotMessage(message, sender, sendResponse) {
 						let other=(i==0)?1:0;
 						if(sync[i].request.time<=sync[other].request.time){
 							butn[k].setAttribute('dly_dir',1);
-							butn[k].innerHTML=butn[k].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(Math.abs(dly)).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
+							butn[k].innerHTML=butn[k].getAttribute('info')+(' (Delay: ')+(Math.abs(dly)).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 						}else{
 							butn[k].setAttribute('dly_dir',-1);
-							butn[k].innerHTML=butn[k].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(-1*Math.abs(dly)).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
+							butn[k].innerHTML=butn[k].getAttribute('info')+(' (Delay: ')+(-1*Math.abs(dly)).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 						}
 						
 					i=sync.length-1;
@@ -527,7 +597,7 @@ function gotMessage(message, sender, sendResponse) {
 			
 			
 											if ((butn[message.self_id] !='') && (typeof butn[message.self_id] !=='undefined') && (message.src==butn[message.self_id].getAttribute('src'))){
-									butn[message.self_id].innerHTML=butn[message.self_id].innerHTML.split(' (Delay:')[0]+(' (Delay: ')+(parseFloat(butn[message.self_id].getAttribute('dly_dir'))*Math.abs(dly)).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
+									butn[message.self_id].innerHTML=butn[message.self_id].getAttribute('info')+(' (Delay: ')+(parseFloat(butn[message.self_id].getAttribute('dly_dir'))*Math.abs(dly)).toLocaleString('en-GB',{useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 7})+'s)';
 									}
 								last_msg=message;
             break;

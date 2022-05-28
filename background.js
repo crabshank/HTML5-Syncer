@@ -43,7 +43,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		;
 	break;
 	 }
-	 return true;
+	 sendResponse({response: "Message received"});
 	});
 }catch (e) {	
   console.error(e);

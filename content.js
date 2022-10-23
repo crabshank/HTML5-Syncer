@@ -341,7 +341,7 @@ function gotMessage(message, sender, sendResponse) {
 			}, function(response) {});}catch(e){;}
 			
 			try{
-                var sync_butns = getMatchingNodesShadow(document,'button.btnClass',false,false);
+                var sync_butns = getMatchingNodesShadow(document,('button.'+btnClass),false,false);
                 
                 for (let i = sync_butns.length - 1; i>=0; i--) {
 					elRemover(sync_butns[i]);

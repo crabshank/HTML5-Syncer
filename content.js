@@ -16,32 +16,64 @@ var msg = 0;
 var last_msg;
 var btnClass='sync_butn';
 
-function getTagNameShadow(docm, tgn){
+function keepMatchesShadow(els,slc,isNodeName){
+   if(slc===false){
+      return els;
+   }else{
+      let out=[];
+   for(let i=0, len=els.length; i<len; i++){
+      let n=els[i];
+           if(isNodeName){
+	            if((n.nodeName.toLocaleLowerCase())===slc){
+	                out.push(n);
+	            }
+           }else{ //selector
+	               if(!!n.matches && typeof n.matches!=='undefined' && n.matches(slc)){
+	                  out.push(n);
+	               }
+           }
+   	}
+   	return out;
+   	}
+}
+
+function getMatchingNodesShadow(docm, slc, isNodeName, onlyShadowRoots){
+slc=(isNodeName && slc!==false)?(slc.toLocaleLowerCase()):slc;
 var shrc=[docm];
 var shrc_l=1;
-
+var out=[];
 let srCnt=0;
 
 while(srCnt<shrc_l){
-	allNodes=[shrc[srCnt],...shrc[srCnt].querySelectorAll('*')];
-	for(let i=0, len=allNodes.length; i<len; i++){
-		if(!!allNodes[i] && typeof allNodes[i] !=='undefined' && allNodes[i].tagName===tgn && i>0){
-			shrc.push(allNodes[i]);
-		}
-
-		if(!!allNodes[i].shadowRoot && typeof allNodes[i].shadowRoot !=='undefined'){
-			let c=allNodes[i].shadowRoot.children;
-			shrc.push(...c);
-		}
+	let curr=shrc[srCnt];
+	let sh=(!!curr.shadowRoot && typeof curr.shadowRoot !=='undefined')?true:false;
+	let nk=keepMatchesShadow([curr],slc,isNodeName);
+	let nk_l=nk.length;
+	
+	if( !onlyShadowRoots && nk_l>0){  
+		out.push(...nk);
 	}
+	
+	shrc.push(...curr.childNodes);
+	
+	if(sh){
+		   let cs=curr.shadowRoot;
+		   let csc=[...cs.childNodes];
+			   if(onlyShadowRoots){
+			      if(nk_l>0){
+			       out.push({root:nk[0], childNodes:csc});
+			      }
+			   }
+			   shrc.push(...csc);
+	}
+
 	srCnt++;
 	shrc_l=shrc.length;
 }
-	shrc=shrc.slice(1);
-	let out=shrc.filter((c)=>{return c.tagName===tgn;});
-	
-	return out;
+
+return out;
 }
+
 function absBoundingClientRect(el){
 	let st = [window?.scrollY,
 					window?.pageYOffset,
@@ -111,7 +143,7 @@ function eligVid(vid) {
 function checkInclude(arr, el) {
     let inside = false;
     for (let i = arr.length - 1; i >= 0; i--) {
-        if (arr[i] === el) {
+        if ( arr[i].isSameNode(el) ) {
             inside = true;
             break;
         }
@@ -128,7 +160,7 @@ function simpleCopyArray(array) {
 function removeEls(d, array) {
     var newArray = [];
     for (let i = 0; i < array.length; i++) {
-        if (array[i] != d) {
+        if (array[i] !== d) {
             newArray.push(array[i]);
         }
     }
@@ -309,7 +341,8 @@ function gotMessage(message, sender, sendResponse) {
 			}, function(response) {});}catch(e){;}
 			
 			try{
-                var sync_butns = getTagNameShadow(document,'BUTTON').filter((b)=>{return b.className===btnClass;});
+                var sync_butns = getMatchingNodesShadow(document,'button.btnClass',false,false);
+                
                 for (let i = sync_butns.length - 1; i>=0; i--) {
 					elRemover(sync_butns[i]);
                 }
@@ -342,8 +375,8 @@ function gotMessage(message, sender, sendResponse) {
             getStrms();
             function getStrms() {
                 var tmpVidTags = [
-                    ...getTagNameShadow(document,'VIDEO'),
-                    ...getTagNameShadow(document,'AUDIO')
+                    ...getMatchingNodesShadow(document,'VIDEO',true,false),
+                    ...getMatchingNodesShadow(document,'AUDIO',true,false)
                 ];
                 if (videoTags.length == 0) {
                     videoTags = simpleCopyArray(tmpVidTags);

@@ -3,7 +3,7 @@
 
   "manifest_version": 3,
   "name": "HTML5 Syncer",
-  "version": "1.66",
+  "version": "1.66.1",
   "content_scripts": [
     {
 	      "all_frames": true,
@@ -16,7 +16,7 @@
    "background": {
      "service_worker": "background.js"
   },
-  "permissions": ["tabs","activeTab"],
+  "permissions": ["tabs"],
   "action": {
     "default_icon": "ct.png",
     "default_popup": "index.html",

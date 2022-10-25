@@ -143,7 +143,7 @@ function eligVid(vid) {
 function checkInclude(arr, el) {
     let inside = false;
     for (let i = arr.length - 1; i >= 0; i--) {
-        if ( arr[i].isSameNode(el) ) {
+        if ( arr[i]===el ) {
             inside = true;
             break;
         }
